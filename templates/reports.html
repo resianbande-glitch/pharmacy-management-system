@@ -16,7 +16,9 @@
   --blue:#4a90d9; --blue-dim:rgba(74,144,217,0.12);
   --ink:#e8f0d4; --ink-mid:#b0c488; --ink-muted:#687848; --ink-faint:#3d4e28;
 }
-::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-lt);border-radius:3px}
+::-webkit-scrollbar{
+  width:5px} 
+  ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border-lt);border-radius:3px}
 body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.22;pointer-events:none;z-index:0}
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 15% 25%,rgba(111,168,50,.06) 0%,transparent 70%);pointer-events:none;z-index:0}
@@ -166,7 +168,7 @@ td{padding:13px 18px;font-size:.84rem;color:var(--ink-mid);vertical-align:middle
           </td>
           <td class="td-total">₱{{ o[2] }}</td>
           <td>
-            <span class="pay-badge pay-{{ o[3]|lower }}">{{ o[3] }}</span>
+            <span class="pay-badge pay-cash">COD</span>
           </td>
         </tr>
         {% else %}

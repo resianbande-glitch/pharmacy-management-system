@@ -130,11 +130,11 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        # 1. Siguroha nga nakuha nimo kining duha gikan sa HTML form
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "").strip() # KANI NGA LINE ANG BASIN NAWALA
 
-        # 2. Security Check (Kadtong dili pwede i-register)
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip() 
+
+       
         if username.lower() in ["admin", "pharmacist"]:
             return render_template("register.html", error="Kini nga username dili pwede gamiton.")
 
@@ -142,7 +142,7 @@ def register():
         cur = conn.cursor()
 
         try:
-            # 3. Kani nga part ang nag-error kay wala kaila si Python ni 'password'
+            
             cur.execute(
                 "INSERT INTO users(username, password, role) VALUES(?, ?, ?)",
                 (username, password, "user")
@@ -443,24 +443,47 @@ def add_to_cart():
 
     return {"message": "added"}
 
-@app.route("/remove_from_cart", methods=["POST"])
+@app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():
-   
-    data = request.get_json() 
-    if not data:
-        return jsonify({"success": False, "message": "No data received"}), 400
-        
-    name = data.get("name")
-    
-    
-    if "cart" in session:
-        
-        if name in session["cart"]:
-            del session["cart"][name]
-            session.modified = True 
-            return jsonify({"success": True})
-    
-    return jsonify({"success": False, "message": "Item not found"}), 400
+    if "user" not in session:
+        return jsonify({"success": False}), 401
+
+    data = request.get_json()
+    name = data.get('name')
+
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM cart WHERE user=? AND medicine=?",
+        (session["user"], name)
+    )
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
+
+@app.route("/get_cart")
+def get_cart():
+    if "user" not in session:
+        return jsonify({})
+
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT medicine, price, qty FROM cart WHERE user=?",
+        (session["user"],)
+    )
+    items = cur.fetchall()
+    conn.close()
+
+    # I-format para ma-match ang JS cartItems object
+    result = {}
+    for item in items:
+        result[item["medicine"]] = {
+            "price": item["price"],
+            "qty": item["qty"]
+        }
+    return jsonify(result)
 
 
 @app.route("/cart")
@@ -493,14 +516,15 @@ def checkout():
     if "user" not in session:
         return jsonify({"error": "not_logged_in"}), 401
 
-    data   = request.json
-    method = data.get("method", "cash")
+    data    = request.json
+    method  = data.get("method", "COD")
+    name    = data.get("name", "")
+    phone   = data.get("phone", "")
+    address = data.get("address", "")
 
     conn = connect()
     cur  = conn.cursor()
-
-   
-    conn.row_factory = sqlite3.Row 
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
     cur.execute(
@@ -513,9 +537,9 @@ def checkout():
         conn.close()
         return jsonify({"error": "cart_empty"}), 400
 
-    total = sum(item["price"] * item["qty"] for item in items)
+    total    = sum(item["price"] * item["qty"] for item in items)
     discount = float(data.get("discount", 0))
-    total = total - (total * discount)
+    total    = total - (total * discount)
 
     cur.execute(
         "INSERT INTO orders(user, total, method) VALUES(?,?,?)",
@@ -533,12 +557,53 @@ def checkout():
     conn.commit()
     conn.close()
 
- 
-    return jsonify({
-    "success": True, 
-    "message": "order_placed", 
-    "total": round(total, 2)
-})
+    return jsonify({"success": True, "message": "order_placed", "total": round(total, 2)})
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    if "user" not in session:
+        return jsonify({"error": "not_logged_in"}), 401
+
+    data    = request.get_json()
+    name    = data.get('name')
+    phone   = data.get('phone')
+    address = data.get('address')
+
+    conn = connect()
+    cur  = conn.cursor()
+
+    # Kuha ang cart sa DB
+    cur.execute(
+        "SELECT medicine, price, qty FROM cart WHERE user=?",
+        (session["user"],)
+    )
+    items = cur.fetchall()
+
+    if not items:
+        conn.close()
+        return jsonify({"error": "cart_empty"}), 400
+
+    total = sum(i["price"] * i["qty"] for i in items)
+
+    # Save order
+    cur.execute(
+        "INSERT INTO orders(user, total, method) VALUES(?,?,?)",
+        (session["user"], round(total, 2), "cash")
+    )
+
+    # ← KANI ANG KULANG: reduce stock
+    for item in items:
+        cur.execute(
+            "UPDATE medicines SET quantity = quantity - ? WHERE name=? AND quantity >= ?",
+            (item["qty"], item["medicine"], item["qty"])
+        )
+
+    # Clear cart
+    cur.execute("DELETE FROM cart WHERE user=?", (session["user"],))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True, "message": "order_placed"})
 # ── RETURN MEDICINE ───────────────────────────────────
 @app.route("/return_medicine", methods=["POST"])
 def return_medicine():
