@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add Medicine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f2ede3;
+    --surface:  #faf7f0;
+    --border:   #ddd5c0;
+    --ink:      #1e2410;
+    --muted:    #6b7055;
+    --olive:    #4e6229;
+    --olive-md: #637b34;
+    --tag-bg:   #e8f0d4;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--olive);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+
+  .logo { display: flex; align-items: center; gap: 10px; color: #fff; }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+  .logo-text { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+  .logo-sub  { font-size: 0.68rem; opacity: 0.65; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-top: -3px; }
+
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 0.82rem; font-weight: 500;
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  .page {
+    max-width: 480px;
+    margin: 48px auto;
+    padding: 0 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #f7f3e9, var(--surface));
+  }
+
+  .card-icon {
+    width: 36px; height: 36px;
+    background: var(--tag-bg);
+    border-radius: 9px;
+    display: grid; place-items: center;
+    font-size: 17px;
+  }
+
+  .card-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--olive); }
+  .card-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+
+  .card-body { padding: 28px 24px; }
+
+  .field { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fffcf5;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--olive-md);
+    box-shadow: 0 0 0 3px rgba(99,123,52,0.12);
+    background: #fff;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: var(--olive);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    margin-top: 6px;
+  }
+
+  .btn-submit:hover {
+    background: #3d4e1f;
+    box-shadow: 0 4px 14px rgba(78,98,41,0.28);
+  }
+
+  .btn-submit:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">💊</div>
+    <div>
+      <span class="logo-text">PharmDesk</span>
+      <span class="logo-sub">Admin Portal</span>
+    </div>
+  </div>
+  <a href="/admin_dashboard" class="back-btn">
+    ← Back to Dashboard
+  </a>
+</header>
+
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">➕</div>
+      <div>
+        <div class="card-title">Add New Medicine</div>
+        <div class="card-sub">Fill in the details below to add to inventory</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      {% if error %}
+      <div style="background:#fde8e8;border:1px solid #f5a0a0;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.84rem;color:#8b1a1a;">⚠️ {{ error }}</div>
+      {% endif %}
+
+      <form action="/add" method="POST">
+
+        <div class="field">
+          <label for="name">Medicine Name</label>
+          <input id="name" name="name" type="text" placeholder="e.g. Amoxicillin 500mg" required>
+        </div>
+
+        <div class="field">
+          <label for="qty">Initial Stock (units)</label>
+          <input id="qty" name="qty" type="number" placeholder="0" min="1" required>
+          <div class="hint">Number of units to add to inventory</div>
+        </div>
+
+        <div class="field">
+          <label for="price">Price per Unit (₱)</label>
+          <input id="price" name="price" type="number" step="0.01" placeholder="0.00" min="0" required>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Medicine
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

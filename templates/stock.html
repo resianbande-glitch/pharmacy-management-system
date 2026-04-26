@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaCare — Stock Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --bg: #0f1209; --bg2: #161b0c; --surface: #1c2410;
+        --border: #2e3d18; --border-lt: #3d5220;
+        --olive: #6fa832; --olive-lt: #90d042;
+        --amber: #e08020; --red: #d94040;
+        --ink: #e8f0d4; --ink-mid: #b0c488; --ink-muted: #687848;
+    }
+    body {
+        font-family: 'Syne', sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        padding: 40px 20px;
+        min-height: 100vh;
+    }
+    
+    body::before {
+        content: ''; position: fixed; inset: 0;
+        background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+        background-size: 48px 48px; opacity: 0.15; pointer-events: none;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .page-title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    
+    .back-btn {
+        text-decoration: none; color: var(--ink-muted); font-family: 'DM Mono', monospace;
+        font-size: 0.8rem; border: 1px solid var(--border); padding: 8px 15px; border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .back-btn:hover { background: var(--surface); color: var(--ink); border-color: var(--border-lt); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+
+    .stock-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .stock-card:hover { border-color: var(--border-lt); transform: translateY(-3px); }
+
+    .med-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; display: block; }
+    
+    
+    .stock-bar-container {
+        height: 8px; background: var(--bg2); border-radius: 10px; overflow: hidden; margin-bottom: 10px;
+    }
+    .stock-bar { height: 100%; border-radius: 10px; transition: width 0.5s ease-out; }
+
+    .status-info { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.75rem; }
+    
+   
+    .bg-ok { background: var(--olive); box-shadow: 0 0 10px rgba(111,168,50,0.3); }
+    .bg-low { background: var(--amber); box-shadow: 0 0 10px rgba(224,128,32,0.3); }
+    .bg-out { background: var(--red); box-shadow: 0 0 10px rgba(217,64,64,0.3); }
+
+    .text-ok { color: var(--olive-lt); }
+    .text-low { color: var(--amber); }
+    .text-out { color: var(--red); }
+
+    .badge {
+        font-size: 0.6rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+        font-weight: 700; margin-left: 8px; vertical-align: middle;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1 class="page-title">Stock Monitor</h1>
+            <p style="color: var(--ink-muted); font-family: 'DM Mono', monospace; font-size: 0.75rem;">// real-time inventory levels</p>
+        </div>
+        <a href="javascript:history.back()" class="back-btn">← Back</a>
+    </header>
+
+    <div class="grid">
+        {% for m in meds %}
+        {% set qty = m['quantity']|int %}
+        <div class="stock-card">
+            <span class="med-name">
+                {{ m['name'] }}
+                {% if qty == 0 %}
+                    <span class="badge" style="background: var(--red); color: white;">Out of Stock</span>
+                {% elif qty < 10 %}
+                    <span class="badge" style="background: var(--amber); color: black;">Low Stock</span>
+                {% endif %}
+            </span>
+
+            <div class="stock-bar-container">
+                {# Calculate width (max 100 for visual) #}
+                {% set width = (qty * 2) if (qty * 2) <= 100 else 100 %}
+                <div class="stock-bar {% if qty == 0 %}bg-out{% elif qty < 10 %}bg-low{% else %}bg-ok{% endif %}" 
+                     style="width: {{ width }}%"></div>
+            </div>
+
+            <div class="status-info">
+                <span class="{% if qty == 0 %}text-out{% elif qty < 10 %}text-low{% else %}text-ok{% endif %}">
+                    {{ qty }} units left
+                </span>
+                <span style="color: var(--ink-muted);">Price: ₱{{ m['price'] }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--ink-muted);">
+            <p>No medicines found in inventory.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>

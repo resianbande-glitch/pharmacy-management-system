@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demand Forecast — PharmaCare ML</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --bg: #f2ede3; --surface: #faf7f0; --border: #ddd5c0;
+        --ink: #1e2410; --ink-muted: #6b7055;
+        --olive: #4e6229; --olive-lt: #8aab4a;
+        --accent: #b5540a; --tag-bg: #e8f0d4;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); padding: 40px 20px; }
+    
+    .container { max-width: 850px; margin: 0 auto; animation: fadeUp 0.5s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1.5px solid var(--border); padding-bottom: 20px; }
+    .page-title { font-family: 'DM Serif Display', serif; font-size: 2.2rem; color: var(--olive); line-height: 1; }
+    .back-btn { text-decoration: none; color: var(--ink-muted); font-family: 'DM Mono', monospace; font-size: 0.8rem; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+    .back-btn:hover { background: var(--surface); color: var(--olive); border-color: var(--olive); }
+
+    .prediction-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+    .predict-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+        padding: 24px; display: flex; align-items: center; justify-content: space-between;
+        transition: transform 0.2s;
+    }
+    .predict-card:hover { transform: scale(1.01); border-color: var(--olive-lt); }
+
+    .med-info { display: flex; align-items: center; gap: 20px; }
+    .status-icon { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; font-size: 24px; }
+    
+    .name-stack .m-name { font-family: 'DM Serif Display', serif; font-size: 1.25rem; display: block; }
+    .name-stack .m-stock { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--ink-muted); }
+
+    .forecast-badge {
+        text-align: right; font-family: 'DM Mono', monospace; padding: 10px 20px; border-radius: 12px;
+    }
+    .demand-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+    .demand-value { font-size: 1rem; font-weight: 600; }
+
+    /* Dynamic Colors */
+    .high-demand { background: #fde8d0; color: var(--accent); border: 1px solid rgba(181,84,10,0.2); }
+    .stable-demand { background: var(--tag-bg); color: var(--olive); border: 1px solid rgba(78,98,41,0.2); }
+    .risk-icon { background: #fee2e2; border: 1px solid #fecaca; }
+    .safe-icon { background: var(--tag-bg); border: 1px solid #d1d5db; }
+
+    .insight-footer {
+        margin-top: 30px; background: var(--olive); color: white; padding: 20px; border-radius: 12px;
+        display: flex; align-items: center; gap: 15px; font-size: 0.9rem;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <span style="font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; color: var(--ink-muted);">Intelligence Module</span>
+            <h1 class="page-title">Demand Forecasting</h1>
+        </div>
+        <a href="javascript:history.back()" class="back-btn">← Back to Portal</a>
+    </header>
+
+    <div class="prediction-grid">
+        {% for res in results %}
+        <div class="predict-card">
+            <div class="med-info">
+                <div class="status-icon {% if res.forecast == 'High' %}risk-icon{% else %}safe-icon{% endif %}">
+                    {% if res.forecast == 'High' %}🔥{% else %}🍃{% endif %}
+                </div>
+                <div class="name-stack">
+                    <span class="m-name">{{ res.name }}</span>
+                    <span class="m-stock">Current Stock: {{ res.current_stock }} units</span>
+                </div>
+            </div>
+
+            <div class="forecast-badge {% if res.forecast == 'High' %}high-demand{% else %}stable-demand{% endif %}">
+                <span class="demand-label">Predicted Demand</span>
+                <span class="demand-value">{{ res.forecast }} Demand</span>
+                <p style="font-size: 0.7rem; margin-top: 4px; opacity: 0.8;">{{ res.action }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: var(--ink-muted);">No prediction data available. Run the model first.</p>
+        {% endfor %}
+    </div>
+
+    <div class="insight-footer">
+        <span style="font-size: 24px;">💡</span>
+        <p><strong>ML Insight:</strong> Based on the last 30 days of sales, we recommend restocking items marked as "High Demand" before the weekend to avoid stockouts.</p>
+    </div>
+</div>
+
+</body>
+</html>
